@@ -1,0 +1,113 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pylab as plt
+import matplotlib.image as mpimg
+import random
+import sys
+from datetime import datetime
+# due righe sotto per caricare qualsiasi risoluzione di immagine
+from PIL import Image
+Image.MAX_IMAGE_PIXELS = None
+
+#Read info on all_data_info
+all_data_info = pd.read_csv("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\all_data_info.csv")
+print(all_data_info.shape)
+
+
+all_data_info_count = all_data_info.groupby('artist').count()
+print(all_data_info_count.shape)
+
+#select artists with >300 paintings
+thresh = 300 
+df_300plus = all_data_info_count[all_data_info_count['new_filename'] >= thresh]
+artist_list = df_300plus.index.values.tolist()
+print(len(artist_list))
+
+# how many paintings for each 57 artists?
+df_300plus['new_filename'].sum() 
+# 24871, more than 57*300=17100
+# subset of original dataset with only those artists
+all_data_info_300plus = all_data_info[all_data_info['artist'].isin(artist_list)]
+print(all_data_info_300plus.shape)
+#save this data frame as a csv file
+all_data_info_300plus.to_csv("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\all_data_info_300plus.csv", index=False, header=True)
+
+#### SOMETHING WENT WRONG HERE, SELECTION IS NOT REPRODUCIBLE
+# we select only 300 paintings per artist
+np.random.seed(23) # set seed for reproducibility
+all_data_info_300 = all_data_info_300plus.groupby('artist')\
+.apply(lambda x: x.sample(300)).reset_index(drop=True)
+print(all_data_info_300.shape)
+
+#### OVERCOME THIS PROBLEM 
+#### TAKING THE LISTS:
+paint_list_train = open('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\paint_list_train.txt', 'r')\
+.read().split('\n')
+paint_list_valid = open('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\paint_list_valid.txt', 'r')\
+.read().split('\n')
+paint_list_test = open('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\paint_list_test.txt', 'r')\
+.read().split('\n')
+#unified list of selected paintings
+true300 = paint_list_train + paint_list_valid + paint_list_test
+#data frame creation of info for the selected paintings
+all_data_info_true300 = all_data_info_300plus[all_data_info_300plus['new_filename'].isin(true300)]
+
+#save this to check
+all_data_info_true300.to_csv("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\all_data_info_true300.csv", index=False, header=True)
+#It truly contains the paintings in the 3 lists
+
+#Starting from Cropped images already splitted into 80-10-10
+# Create npy array for each set
+
+## Train set
+im300_train = np.zeros((len(paint_list_train),224,224,3), dtype = int)
+time_start = datetime.now()
+iter = 0
+for JPEG in paint_list_train:
+    im = plt.imread("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\train\\{}".format(JPEG))
+    #after {}" we need to attach .format() with argument the string we want to attach
+    im300_train[iter,:,:,:] = im 
+    #insert image in 4d array at iter-th position
+    iter += 1
+time_end = datetime.now()
+print('Tempo di esecuzione: {}'.format(time_end-time_start))
+np.save("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\array_train", im300_train)
+# #sys.getsizeof(im300_train)/1e9 #gigabytes
+
+#check the last array corresponds to 53473.jpg
+plt.imshow(im300_train[13679,:,:,:])
+
+## Test set
+im300_test = np.zeros((len(paint_list_test),224,224,3), dtype = int)
+time_start = datetime.now()
+iter = 0
+for JPEG in paint_list_test:
+    im = plt.imread("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\test\\{}".format(JPEG))
+    #after {}" we need to attach .format() with argument the string we want to attach
+    im300_test[iter,:,:,:] = im 
+    #insert image in 4d array at iter-th position
+    iter += 1
+time_end = datetime.now()
+print('Tempo di esecuzione: {}'.format(time_end-time_start))
+np.save("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\array_test", im300_test)
+
+# #sys.getsizeof(im300_train)/1e9 #gigabytes
+
+#check the last array corresponds to 45713.jpg
+plt.imshow(im300_test[1709,:,:,:])
+
+## Valid set
+im300_valid = np.zeros((len(paint_list_valid),224,224,3), dtype = int)
+time_start = datetime.now()
+iter = 0
+for JPEG in paint_list_valid:
+    im = plt.imread("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\valid\\{}".format(JPEG))
+    #after {}" we need to attach .format() with argument the string we want to attach
+    im300_valid[iter,:,:,:] = im 
+    #insert image in 4d array at iter-th position
+    iter += 1
+time_end = datetime.now()
+print('Tempo di esecuzione: {}'.format(time_end-time_start))
+np.save("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\array_valid", im300_valid)
+
+# #sys.getsizeof(im300_train)/1e9 #gigabytes
