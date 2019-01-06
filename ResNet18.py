@@ -52,8 +52,15 @@ STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 ###   ResNet18 - transfer learning   ###
 
 # transfer learning
-from classification_models import ResNet18
+#making it doable on GPU
+import tensorflow as tf
+import keras  
+config = tf.ConfigProto( device_count = {'GPU': 1 , 'CPU': 4} ) 
+sess = tf.Session(config=config) 
+keras.backend.set_session(sess)
+
 # build model
+from classification_models import ResNet18
 n_classes = len(artist_list)
 base_model = ResNet18(input_shape=(224,224,3), weights='imagenet', include_top=False)
 x = keras.layers.GlobalAveragePooling2D()(base_model.output)
@@ -78,9 +85,7 @@ learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',\
                                             patience=3,\
                                             verbose=1,\
                                             min_lr=0.0001)
-model.compile(optimizer='Adam', loss='categorical_crossentropy',\
-              metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy])
-              
+    
 # training
 model.compile(optimizer='Adam', loss='categorical_crossentropy',\
               metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy])
