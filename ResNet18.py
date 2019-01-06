@@ -67,7 +67,8 @@ x = keras.layers.GlobalAveragePooling2D()(base_model.output)
 output = keras.layers.Dense(n_classes, activation='softmax')(x)
 model = keras.models.Model(inputs=[base_model.input], outputs=[output])
 model.summary()
-# ora è transfer learning, infatti setto i primi layer del modello a 'già trainati'
+
+# We do not train the ResNet18 layes
 #len(model.layers)
 #model.layers[(len(model.layers) - 2) : len(model.layers)]
 #for i in range(len(model.layers) - 2):
