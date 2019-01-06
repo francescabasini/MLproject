@@ -94,8 +94,8 @@ model.fit_generator(generator=train_generator,\
                     steps_per_epoch=STEP_SIZE_TRAIN,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
-                    epochs=30, verbose=2,callbacks=[learning_rate_reduction])
-model.save('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\ResNet18_TOPonly.h5')  # TL sta per 'Transfer Learning'
+                    epochs=5, verbose=2,callbacks=[learning_rate_reduction])
+model.save('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\ResNet18_TOPonly_5eps.h5')  # TL sta per 'Transfer Learning'
 
 # list all data in history
 print(model.history.history.keys())
