@@ -95,7 +95,7 @@ model.fit_generator(generator=train_generator,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
                     epochs=30, verbose=2,callbacks=[learning_rate_reduction])
-model.save('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\ResNet18_finetune.h5')  # TL sta per 'Transfer Learning'
+model.save('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\ResNet18_RNrandTOP.h5')  # TL sta per 'Transfer Learning'
 
 # list all data in history
 print(model.history.history.keys())
