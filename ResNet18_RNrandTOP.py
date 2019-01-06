@@ -11,7 +11,7 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 # creo il dataset contenente i nomi dei file .jpg da leggere e le rispettive labels
-all_data_info_true300 = pd.read_csv("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\all_data_info_true300.csv")
+all_data_info_true300 = pd.read_csv("all_data_info_true300.csv")
 
 all_data_info_true300_count = all_data_info_true300.groupby('artist').count()
 print(all_data_info_true300_count.shape)
@@ -28,13 +28,13 @@ valid_datagen = ImageDataGenerator(horizontal_flip=False)
 #featurewise_std_normalization    normalize
 
 train_generator = train_datagen.flow_from_dataframe(df,\
-"C:\\Users\\basi9\\Desktop\\ML Project\\Data\\train", \
+"data/train", \
 target_size=(224, 224), x_col='new_filename',\
 y_col='artist', has_ext=True, seed=100)
 #Found 13680 images belonging to 57 classes.
 
 valid_generator = valid_datagen.flow_from_dataframe(df,\
-"C:\\Users\\basi9\\Desktop\\ML Project\\Data\\valid",\
+"data/valid",\
 target_size=(224, 224), x_col='new_filename',\
 y_col='artist', has_ext=True, seed=100)
 #Found 1710 images belonging to 57 classes.
@@ -95,7 +95,7 @@ model.fit_generator(generator=train_generator,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
                     epochs=30, verbose=2,callbacks=[learning_rate_reduction])
-model.save('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\ResNet18_RNrandTOP.h5')  # TL sta per 'Transfer Learning'
+model.save('data/ResNet18_RNrandTOP.h5')  # TL sta per 'Transfer Learning'
 
 # list all data in history
 print(model.history.history.keys())
