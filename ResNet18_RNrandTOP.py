@@ -62,7 +62,7 @@ keras.backend.set_session(sess)
 # build model
 from classification_models import ResNet18
 n_classes = len(artist_list)
-base_model = ResNet18(input_shape=(224,224,3), weights='imagenet', include_top=False)
+base_model = ResNet18(input_shape=(224,224,3), weights=None, include_top=False)
 x = keras.layers.GlobalAveragePooling2D()(base_model.output)
 output = keras.layers.Dense(n_classes, activation='softmax')(x)
 model = keras.models.Model(inputs=[base_model.input], outputs=[output])
@@ -77,10 +77,60 @@ model.summary()
 
 from keras.metrics import top_k_categorical_accuracy
 from keras.callbacks import ReduceLROnPlateau
+from keras import backend as K
 def top_1_categorical_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=1)
 def top_3_categorical_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=3)
+def precision(y_true, y_pred):
+    """
+    Precision metric.
+    Only computes a batch-wise average of precision.
+    Computes the precision, a metric for multi-label classification of how many selected items are relevant.
+    """
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precis = true_positives / (predicted_positives + K.epsilon())
+    return precis
+def recall(y_true, y_pred):
+    """
+    Recall metric.
+    Only computes a batch-wise average of recall.
+    Computes the recall, a metric for multi-label classification of how many relevant items are selected.
+    """
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    rec = true_positives / (possible_positives + K.epsilon())
+    return rec
+def F1_score(y_true, y_pred):
+    '''
+    defined as the harmonic average of precision and recall,
+    i.e.   2*p*r / (p+r)
+    '''
+    def precision(y_true, y_pred):
+        """
+        Precision metric.
+        Only computes a batch-wise average of precision.
+        Computes the precision, a metric for multi-label classification of how many selected items are relevant.
+        """
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        precis = true_positives / (predicted_positives + K.epsilon())
+        return precis
+    def recall(y_true, y_pred):
+        """
+        Recall metric.
+        Only computes a batch-wise average of recall.
+        Computes the recall, a metric for multi-label classification of how many relevant items are selected.
+        """
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        rec = true_positives / (possible_positives + K.epsilon())
+        return rec
+    precision = precision(y_true, y_pred)
+    recall = recall(y_true, y_pred)
+    return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',\
                                             factor=0.1,\
                                             patience=3,\
