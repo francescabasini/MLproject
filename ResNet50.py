@@ -98,24 +98,73 @@ def top_1_categorical_accuracy(y_true, y_pred):
 def top_3_categorical_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=3)
 
+def precision(y_true, y_pred):
+    """
+    Precision metric.
+    Only computes a batch-wise average of precision.
+    Computes the precision, a metric for multi-label classification of how many selected items are relevant.
+    """
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precis = true_positives / (predicted_positives + K.epsilon())
+    return precis
+def recall(y_true, y_pred):
+    """
+    Recall metric.
+    Only computes a batch-wise average of recall.
+    Computes the recall, a metric for multi-label classification of how many relevant items are selected.
+    """
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    rec = true_positives / (possible_positives + K.epsilon())
+    return rec
+def F1_score(y_true, y_pred):
+    '''
+    defined as the harmonic average of precision and recall,
+    i.e.   2*p*r / (p+r)
+    '''
+    def precision(y_true, y_pred):
+        """
+        Precision metric.
+        Only computes a batch-wise average of precision.
+        Computes the precision, a metric for multi-label classification of how many selected items are relevant.
+        """
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        precis = true_positives / (predicted_positives + K.epsilon())
+        return precis
+    def recall(y_true, y_pred):
+        """
+        Recall metric.
+        Only computes a batch-wise average of recall.
+        Computes the recall, a metric for multi-label classification of how many relevant items are selected.
+        """
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        rec = true_positives / (possible_positives + K.epsilon())
+        return rec
+    precision = precision(y_true, y_pred)
+    recall = recall(y_true, y_pred)
+return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+
 from keras.callbacks import ReduceLROnPlateau
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',factor=0.1,\
                                             patience=3,verbose=1,min_lr=0.0001)
 
 
 model50.compile(optimizer='adam', loss='categorical_crossentropy',\
-                metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy])
+                metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
 
 time_start = datetime.now()
 model50.fit_generator(generator=train_generator,\
                     steps_per_epoch=STEP_SIZE_TRAIN,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
-                    verbose=2, epochs=10, callbacks=[learning_rate_reduction])
+                    verbose=2, epochs=30, callbacks=[learning_rate_reduction])
 time_end = datetime.now()
 print('Tempo di esecuzione per fit_gen: {}'.format(time_end-time_start))
 
-model50.save('C:\\Users\\basi9\\Desktop\\ML Project\\Data\\resnet50_TL.h5')
+model50.save('data/resnet50_TOP_30ep.h5')
 # train the model on the new data for a few epochs
 ##model.fit_generator(generator=training_generator,
 #                    validation_data=validation_generator,
