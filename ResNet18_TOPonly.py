@@ -76,7 +76,6 @@ for i in range(len(model.layers) - 2):
 model.summary()
 
 from keras.metrics import top_k_categorical_accuracy
-from keras.callbacks import ReduceLROnPlateau
 
 def top_1_categorical_accuracy(y_true, y_pred):
     return top_k_categorical_accuracy(y_true, y_pred, k=1)
@@ -131,6 +130,7 @@ def F1_score(y_true, y_pred):
     recall = recall(y_true, y_pred)
 return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
+from keras.callbacks import ReduceLROnPlateau
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',\
                                             factor=0.1,\
                                             patience=3,\
