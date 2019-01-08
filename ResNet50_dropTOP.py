@@ -17,7 +17,7 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 # creo il dataset contenente i nomi dei file .jpg da leggere e le rispettive labels
-all_data_info_true300 = pd.read_csv("C:\\Users\\basi9\\Desktop\\ML Project\\Data\\all_data_info_true300.csv")
+all_data_info_true300 = pd.read_csv("all_data_info_true300.csv")
 
 all_data_info_true300_count = all_data_info_true300.groupby('artist').count()
 print(all_data_info_true300_count.shape)
@@ -34,13 +34,13 @@ valid_datagen = ImageDataGenerator(horizontal_flip=False)
 #featurewise_std_normalization    normalize
 
 train_generator = train_datagen.flow_from_dataframe(df,\
-"C:\\Users\\basi9\\Desktop\\ML Project\\Data\\train", \
+"data/train", \
 target_size=(224, 224), x_col='new_filename',\
 y_col='artist', has_ext=True, seed=100)
 #Found 13680 images belonging to 57 classes.
 
 valid_generator = valid_datagen.flow_from_dataframe(df,\
-"C:\\Users\\basi9\\Desktop\\ML Project\\Data\\valid",\
+"data/valid",\
 target_size=(224, 224), x_col='new_filename',\
 y_col='artist', has_ext=True, seed=100)
 #Found 1710 images belonging to 57 classes.
@@ -83,9 +83,9 @@ x = Dropout(0.3)(x)
 output = Dense(n_classes, activation='softmax')(x)
 
 # this is the model we will train
-model50 = Model(inputs=base_model.input, outputs=output)
+model50drop = Model(inputs=base_model.input, outputs=output)
 
-model50.summary()
+model50drop.summary()
 
 # first: train only the top layers (which were randomly initialized)
 # i.e. freeze all convolutional ResNet50 layers
@@ -155,11 +155,13 @@ learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',factor=0.1,\
                                             patience=3,verbose=1,min_lr=0.0001)
 
 
-model50.compile(optimizer='adam', loss='categorical_crossentropy',\
+model50drop.compile(optimizer='adam', loss='categorical_crossentropy',\
                 metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
 
+model50drop.compile(optimizer='SGD', loss='categorical_crossentropy',\
+                    metrics=['accruracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
 time_start = datetime.now()
-model50.fit_generator(generator=train_generator,\
+model50drop.fit_generator(generator=train_generator,\
                     steps_per_epoch=STEP_SIZE_TRAIN,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
@@ -167,7 +169,7 @@ model50.fit_generator(generator=train_generator,\
 time_end = datetime.now()
 print('Tempo di esecuzione per fit_gen: {}'.format(time_end-time_start))
 
-model50.save('data/resnet50_dropTOP_30ep.h5')
+model50drop.save('data/resnet50_dropTOP_30ep.h5')
 # train the model on the new data for a few epochs
 ##model.fit_generator(generator=training_generator,
 #                    validation_data=validation_generator,
