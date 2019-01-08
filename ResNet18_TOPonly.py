@@ -147,6 +147,13 @@ model.fit_generator(generator=train_generator,\
                     epochs=5, verbose=2,callbacks=[learning_rate_reduction])
 model.save('data/ResNet18_TOPonly_5eps.h5')  # TL sta per 'Transfer Learning'
 
+model.fit_generator(generator=train_generator,\
+                    steps_per_epoch=STEP_SIZE_TRAIN,\
+                    validation_data=valid_generator,\
+                    validation_steps=STEP_SIZE_VALID,\
+                    epochs=30, verbose=2,callbacks=[learning_rate_reduction])
+model.save('data/ResNet18_TOPonly_30eps.h5')
+
 # list all data in history
 print(model.history.history.keys())
 # summarize history for accuracy
