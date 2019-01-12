@@ -17,7 +17,7 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 # creo il dataset contenente i nomi dei file .jpg da leggere e le rispettive labels
-all_data_info_true300 = pd.read_csv("all_data_info_true300.csv")
+all_data_info_true300 = pd.read_csv("data/all_data_info_true300.csv")
 
 all_data_info_true300_count = all_data_info_true300.groupby('artist').count()
 print(all_data_info_true300_count.shape)
@@ -148,7 +148,7 @@ def F1_score(y_true, y_pred):
         return rec
     precision = precision(y_true, y_pred)
     recall = recall(y_true, y_pred)
-return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+    return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
 from keras.callbacks import ReduceLROnPlateau
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',factor=0.1,\
@@ -168,40 +168,24 @@ model50drop.fit_generator(generator=train_generator,\
                     verbose=2, epochs=30, callbacks=[learning_rate_reduction])
 time_end = datetime.now()
 print('Tempo di esecuzione per fit_gen: {}'.format(time_end-time_start))
+model50drop.save('data/ResNet50_dropTOP_30epochs.h5')
 
-model50drop.save('data/resnet50_dropTOP_30ep.h5')
-# train the model on the new data for a few epochs
-##model.fit_generator(generator=training_generator,
-#                    validation_data=validation_generator,
-#                    use_multiprocessing=True,
-#                    workers=3)
+# accuracy plots
+import pickle
+import os
+os.system("mkdir dictionaries")
+with open('dictionaries/ResNet50_dropTOP_30epochsDict.pkl', 'wb') as file_pi:
+    pickle.dump(model50drop.history.history, file_pi)
 
+# list all data in history
+print(model50drop.history.history.keys())
+# summarize history for accuracy
+plt.figure()
+plt.plot(model50drop.history.history['acc'])
+plt.plot(model50drop.history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.savefig('ResNet50_dropTOP_30epochs.png')
 
-
-####################################################
-### FINE-TUNING
-
-# at this point, the top layers are well trained and we can start fine-tuning
-# convolutional layers from inception V3. We will freeze the bottom N layers
-# and train the remaining top layers.
-
-## let's visualize layer names and layer indices to see how many layers
-## we should freeze:
-#for i, layer in enumerate(base_model.layers):
-#   print(i, layer.name)
-#
-## we chose to train the top 2 inception blocks, i.e. we will freeze
-## the first 249 layers and unfreeze the rest:
-#for layer in model.layers[:249]:
-#   layer.trainable = False
-#for layer in model.layers[249:]:
-#   layer.trainable = True
-#
-## we need to recompile the model for these modifications to take effect
-## we use SGD with a low learning rate
-#from keras.optimizers import SGD
-#model.compile(optimizer=SGD(lr=0.0001, momentum=0.9), loss='categorical_crossentropy')
-#
-## we train our model again (this time fine-tuning the top 2 inception blocks
-## alongside the top Dense layers
-#model.fit_generator(...)
