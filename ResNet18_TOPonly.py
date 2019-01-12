@@ -181,9 +181,6 @@ for i in range(len(model18_FineTune.layers) - 2):
 model18_FineTune.summary()
 
 #FineTuning
-# training the whole model with previously trained TOP and now with Imagenet starting weights for ResnNet18
-model18_FineTune.compile(optimizer='Adam', loss='categorical_crossentropy',\
-              metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
 model18_FineTune.fit_generator(generator=train_generator,\
                     steps_per_epoch=STEP_SIZE_TRAIN,\
                     validation_data=valid_generator,\
