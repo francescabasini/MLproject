@@ -147,19 +147,70 @@ model.fit_generator(generator=train_generator,\
                     epochs=5, verbose=2,callbacks=[learning_rate_reduction])
 model.save('data/ResNet18_TOPonly_5eps.h5')  # TL sta per 'Transfer Learning'
 
-# list all data in history
-print(model.history.history.keys())
-# summarize history for accuracy
-plt.plot(model.history.history['acc'])
-plt.plot(model.history.history['val_acc'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show()
 
 import pickle
 import os
 os.system("mkdir dictionaries")
 with open('dictionaries/ResNet18_TOPonly_5epochsDict.pkl', 'wb') as file_pi:
     pickle.dump(history.history, file_pi)
+
+# list all data in history
+print(model.history.history.keys())
+# summarize history for accuracy
+plt.figure()
+plt.plot(model.history.history['acc'])
+plt.plot(model.history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show(block=False)
+
+#### Once I saved these infos
+
+#load the model
+model18_FineTune = keras.load_model('data/ResNet18_TOPonly_5eps.h5'),   # you can load a different model
+                         custom_objects={'top_3_categorical_accuracy': top_3_categorical_accuracy,
+                                         'precision': precision,
+                                         'recall': recall,
+                                         'F1_score': F1_score})
+
+len(model18_FineTune.layers)
+model18_FineTune.layers[(len(model18_FineTune.layers) - 2) : len(model18_FineTune.layers)]
+for i in range(len(model18_FineTune.layers) - 2):
+    model18_FineTune.layers[i].trainable = True
+model18_FineTune.summary()
+
+#FineTuning
+# training the whole model with previously trained TOP and now with Imagenet starting weights for ResnNet18
+model18_FineTune.compile(optimizer='Adam', loss='categorical_crossentropy',\
+              metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
+model18_FineTune.fit_generator(generator=train_generator,\
+                    steps_per_epoch=STEP_SIZE_TRAIN,\
+                    validation_data=valid_generator,\
+                    validation_steps=STEP_SIZE_VALID,\
+                    epochs=25, verbose=2,callbacks=[learning_rate_reduction])
+model.save('data/ResNet18_FineTune_25epochs.h5')  
+
+# load the history of the saved model from the pickle file
+with open('dictionaries/ResNet18_TOPonly_5epochsDict.pkl', 'rb') as file_pi:
+    hist = pickle.load(file_pi)
+# merge the two dicts with the histories
+hist2 = model.history.history
+h = {key:np.hstack([hist[key],hist2[key]]) for key in hist.keys()}
+
+# save new history dict in a new pickle file
+with open('dictionaries/ResNet18_FineTune_25epochsDict.pkl', 'wb') as file_pi:
+    pickle.dump(h, file_pi)
+
+# accuracy plots
+plt.figure()
+plt.plot(h['acc'])
+plt.plot(h['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'valid'], loc='upper left')
+plt.show(block=False)
+
+plt.savefig('ResNet18_FineTune.png')
