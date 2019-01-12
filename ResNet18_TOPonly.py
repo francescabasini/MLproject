@@ -209,4 +209,4 @@ plt.xlabel('epoch')
 plt.legend(['train', 'valid'], loc='upper left')
 plt.show(block=False)
 
-plt.savefig('ResNet18_FineTune.png')
+plt.savefig('ResNet18_FineTune_30epochs.png')
