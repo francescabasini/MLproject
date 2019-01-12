@@ -55,6 +55,7 @@ STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 #making it doable on GPU
 import tensorflow as tf
 import keras  
+from keras import backend as K
 config = tf.ConfigProto( device_count = {'GPU': 1 , 'CPU': 4} ) 
 sess = tf.Session(config=config) 
 keras.backend.set_session(sess)
@@ -152,7 +153,7 @@ import pickle
 import os
 os.system("mkdir dictionaries")
 with open('dictionaries/ResNet18_TOPonly_5epochsDict.pkl', 'wb') as file_pi:
-    pickle.dump(history.history, file_pi)
+    pickle.dump(model.history.history, file_pi)
 
 # list all data in history
 print(model.history.history.keys())
@@ -169,11 +170,9 @@ plt.show(block=False)
 #### Once I saved these infos
 
 #load the model
-model18_FineTune = keras.load_model('data/ResNet18_TOPonly_5eps.h5'),   # you can load a different model
-                         custom_objects={'top_3_categorical_accuracy': top_3_categorical_accuracy,
-                                         'precision': precision,
-                                         'recall': recall,
-                                         'F1_score': F1_score})
+model18_FineTune = keras.load_model('data/ResNet18_TOPonly_5eps.h5',\
+custom_objects={'top_3_categorical_accuracy': top_3_categorical_accuracy,\
+'precision': precision,'recall': recall,'F1_score': F1_score})
 
 len(model18_FineTune.layers)
 model18_FineTune.layers[(len(model18_FineTune.layers) - 2) : len(model18_FineTune.layers)]
