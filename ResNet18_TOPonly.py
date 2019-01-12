@@ -11,7 +11,7 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 # creo il dataset contenente i nomi dei file .jpg da leggere e le rispettive labels
-all_data_info_true300 = pd.read_csv("all_data_info_true300.csv")
+all_data_info_true300 = pd.read_csv("data/all_data_info_true300.csv")
 
 all_data_info_true300_count = all_data_info_true300.groupby('artist').count()
 print(all_data_info_true300_count.shape)
@@ -129,7 +129,7 @@ def F1_score(y_true, y_pred):
         return rec
     precision = precision(y_true, y_pred)
     recall = recall(y_true, y_pred)
-return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+    return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
 from keras.callbacks import ReduceLROnPlateau
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',\
@@ -170,7 +170,7 @@ plt.show(block=False)
 #### Once I saved these infos
 
 #load the model
-model18_FineTune = keras.load_model('data/ResNet18_TOPonly_5eps.h5',\
+model18_FineTune = keras.models.load_model('data/ResNet18_TOPonly_5eps.h5',\
 custom_objects={'top_3_categorical_accuracy': top_3_categorical_accuracy,\
 'precision': precision,'recall': recall,'F1_score': F1_score})
 
