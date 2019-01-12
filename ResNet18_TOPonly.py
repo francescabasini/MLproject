@@ -170,8 +170,8 @@ plt.show(block=False)
 #### Once I saved these infos
 
 #load the model
-model18_FineTune = keras.models.load_model('data/ResNet18_TOPonly_5eps.h5',\
-custom_objects={'top_3_categorical_accuracy': top_3_categorical_accuracy,\
+model18_FineTune = keras.models.load_model('data/ResNet18_TOPonly_5eps.h5', \
+custom_objects={'top_1_categorical_accuracy': top_1_categorical_accuracy, 'top_3_categorical_accuracy': top_3_categorical_accuracy,
 'precision': precision,'recall': recall,'F1_score': F1_score})
 
 len(model18_FineTune.layers)
