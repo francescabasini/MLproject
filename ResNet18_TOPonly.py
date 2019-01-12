@@ -186,13 +186,13 @@ model18_FineTune.fit_generator(generator=train_generator,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
                     epochs=25, verbose=2,callbacks=[learning_rate_reduction])
-model.save('data/ResNet18_FineTune_25epochs.h5')  
+model18_FineTune.save('data/ResNet18_FineTune_25epochs.h5')  
 
 # load the history of the saved model from the pickle file
 with open('dictionaries/ResNet18_TOPonly_5epochsDict.pkl', 'rb') as file_pi:
     hist = pickle.load(file_pi)
 # merge the two dicts with the histories
-hist2 = model.history.history
+hist2 = model18_FineTune.history.history
 h = {key:np.hstack([hist[key],hist2[key]]) for key in hist.keys()}
 
 # save new history dict in a new pickle file
@@ -207,6 +207,4 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'valid'], loc='upper left')
-plt.show(block=False)
-
 plt.savefig('ResNet18_FineTune_30epochs.png')
