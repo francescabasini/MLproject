@@ -70,17 +70,17 @@ base_model = ResNet50(input_shape=(224,224,3), weights='imagenet',include_top=Fa
 #
 base_model.summary()
 
-x = GlobalAveragePooling2D()(base_model.output)
+x = keras.layers.GlobalAveragePooling2D()(base_model.output)
 #put or not keras.layers.?
 
 # let's add a fully-connected layer
 #x = keras.layers.Dense(1024, activation='relu')(x)
 
 # we add a logistic/classification layer for our classes
-output = Dense(n_classes, activation='softmax')(x)
+output = keras.layers.Dense(n_classes, activation='softmax')(x)
 
 # this is the model we will train
-model50 = Model(inputs=base_model.input, outputs=output)
+model50 = keras.models.Model(inputs=base_model.input, outputs=output)
 
 model50.summary()
 
@@ -163,7 +163,7 @@ model50.fit_generator(generator=train_generator,\
                     verbose=2, epochs=30, callbacks=[learning_rate_reduction])
 time_end = datetime.now()
 print('Tempo di esecuzione per fit_gen: {}'.format(time_end-time_start))
-model50.save('data/ResNet50_TOP_30epochs.h5')
+model50.save('data/ResNet50_TOPonly_30epochs.h5')
 
 # accuracy plots
 import pickle
