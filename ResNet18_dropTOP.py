@@ -54,7 +54,8 @@ STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 # transfer learning
 #making it doable on GPU
 import tensorflow as tf
-import keras  
+import keras 
+from keras import backend as K 
 config = tf.ConfigProto( device_count = {'GPU': 1 , 'CPU': 4} ) 
 sess = tf.Session(config=config) 
 keras.backend.set_session(sess)
@@ -65,8 +66,8 @@ n_classes = len(artist_list)
 base_model = ResNet18(input_shape=(224,224,3), weights='imagenet', include_top=False)
 x = keras.layers.GlobalAveragePooling2D()(base_model.output)
 #not sure about adding flatten
-x = Flatten(x)
-x = Dropout(0.3)(x)
+x = keras.layers.Flatten(x)
+x = keras.layers.Dropout(0.3)(x)
 output = keras.layers.Dense(n_classes, activation='softmax')(x)
 model_dropTOP18 = keras.models.Model(inputs=[base_model.input], outputs=[output])
 model_dropTOP18.summary()
@@ -131,7 +132,7 @@ def F1_score(y_true, y_pred):
         return rec
     precision = precision(y_true, y_pred)
     recall = recall(y_true, y_pred)
-return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
+    return 2 * ((precision * recall) / (precision + recall + K.epsilon()))
 
 from keras.callbacks import ReduceLROnPlateau
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',\
@@ -148,7 +149,7 @@ model_dropTOP18.fit_generator(generator=train_generator,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
                     epochs=30, verbose=2,callbacks=[learning_rate_reduction])
-model_dropTOP18.save('data/ResNet18_dropTOP_30eps.h5')  # TL sta per 'Transfer Learning'
+model_dropTOP18.save('data/ResNet18_dropTOP_30epochs.h5')  # TL sta per 'Transfer Learning'
 
 # list all data in history
 print(model_dropTOP18.history.history.keys())
@@ -159,4 +160,5 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
-plt.show()
+plt.savefig('ResNet18_dropTOP_30epochs.png')
+
