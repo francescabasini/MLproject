@@ -63,18 +63,6 @@ keras.backend.set_session(sess)
 # build model
 from classification_models import ResNet18
 n_classes = len(artist_list)
-base_model = ResNet18(input_shape=(224,224,3), weights='imagenet', include_top=False)
-x = keras.layers.GlobalAveragePooling2D()(base_model.output)
-output = keras.layers.Dense(n_classes, activation='softmax')(x)
-model = keras.models.Model(inputs=[base_model.input], outputs=[output])
-model.summary()
-
-# We only train top layers, therefore we freeze the ResNet ones
-len(model.layers)
-model.layers[(len(model.layers) - 2) : len(model.layers)]
-for i in range(len(model.layers) - 2):
-    model.layers[i].trainable = False
-model.summary()
 
 from keras.metrics import top_k_categorical_accuracy
 
