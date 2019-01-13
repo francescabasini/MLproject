@@ -70,20 +70,20 @@ base_model = ResNet50(input_shape=(224,224,3), weights='imagenet',include_top=Fa
 #
 base_model.summary()
 
-x = GlobalAveragePooling2D()(base_model.output)
+x = keras.layers.GlobalAveragePooling2D()(base_model.output)
 #not sure about adding flatten
-x = Flatten(x)
-x = Dropout(0.3)(x)
+x = keras.layers.Flatten(x)
+x = keras.layers.Dropout(0.3)(x)
 #put or not keras.layers.?
 
 # let's add a fully-connected layer
 #x = keras.layers.Dense(1024, activation='relu')(x)
 
 # we add a logistic/classification layer for our classes
-output = Dense(n_classes, activation='softmax')(x)
+output = keras.layers.Dense(n_classes, activation='softmax')(x)
 
 # this is the model we will train
-model50drop = Model(inputs=base_model.input, outputs=output)
+model50drop = keras.models.Model(inputs=base_model.input, outputs=output)
 
 model50drop.summary()
 
