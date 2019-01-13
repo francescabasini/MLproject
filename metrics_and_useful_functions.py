@@ -4,6 +4,8 @@ import itertools
 import random
 from keras.metrics import top_k_categorical_accuracy
 from keras import backend as K
+from keras.applications.xception import preprocess_input as pp_input_xcept
+from keras.applications.resnet50 import preprocess_input as pp_input_rn50
 
 
 
@@ -127,6 +129,58 @@ def crop_image_train(img):
 
 def crop_image_valid(img):
     im = img
+    if len(im.shape) < 3:  # make black&white images RGB
+        im = np.stack((im, im, im), -1)
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # now 224x224 crop at the center
+    numb_0 = im.shape[0] // 2 - 112
+    numb_1 = im.shape[1] // 2 - 112
+    im = im[numb_0:(numb_0 + 224), numb_1:(numb_1 + 224), :]
+    return im
+
+def crop_image_train_xception(img):
+    im = img
+    im = pp_input_xcept(im)
+    if len(im.shape) < 3:  # make black&white images RGB
+        im = np.stack((im, im, im), -1)
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # now random 224x224 crop
+    rand_numb_0 = random.randint(0, im.shape[0] - 224)
+    rand_numb_1 = random.randint(0, im.shape[1] - 224)
+    im = im[rand_numb_0:(rand_numb_0 + 224), rand_numb_1:(rand_numb_1 + 224), :]
+    return im
+
+def crop_image_valid_xception(img):
+    im = img
+    im = pp_input_xcept(im)
+    if len(im.shape) < 3:  # make black&white images RGB
+        im = np.stack((im, im, im), -1)
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # now 224x224 crop at the center
+    numb_0 = im.shape[0] // 2 - 112
+    numb_1 = im.shape[1] // 2 - 112
+    im = im[numb_0:(numb_0 + 224), numb_1:(numb_1 + 224), :]
+    return im
+
+def crop_image_train_resnet50(img):
+    im = img
+    im = pp_input_rn50(im)
+    if len(im.shape) < 3:  # make black&white images RGB
+        im = np.stack((im, im, im), -1)
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # now random 224x224 crop
+    rand_numb_0 = random.randint(0, im.shape[0] - 224)
+    rand_numb_1 = random.randint(0, im.shape[1] - 224)
+    im = im[rand_numb_0:(rand_numb_0 + 224), rand_numb_1:(rand_numb_1 + 224), :]
+    return im
+
+def crop_image_valid_resnet50(img):
+    im = img
+    im = pp_input_rn50(im)
     if len(im.shape) < 3:  # make black&white images RGB
         im = np.stack((im, im, im), -1)
     if im.shape[2] == 4:  # remove 4th channel if present
