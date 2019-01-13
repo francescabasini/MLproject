@@ -158,8 +158,7 @@ learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc',factor=0.1,\
 model50drop.compile(optimizer='adam', loss='categorical_crossentropy',\
                 metrics=['accuracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
 
-#model50drop.compile(optimizer='SGD', loss='categorical_crossentropy',\
-                    metrics=['accruracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
+#model50drop.compile(optimizer='SGD', loss='categorical_crossentropy',metrics=['accruracy', top_1_categorical_accuracy, top_3_categorical_accuracy, precision, recall, F1_score])
 time_start = datetime.now()
 model50drop.fit_generator(generator=train_generator,\
                     steps_per_epoch=STEP_SIZE_TRAIN,\
