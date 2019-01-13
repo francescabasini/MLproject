@@ -62,16 +62,16 @@ keras.backend.set_session(sess)
 
 # build model
 def createModel():
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(224, 224, 3)))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model = keras.models.Sequential()
+    model.add(keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu', input_shape=(224, 224, 3)))
+    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (3, 3), padding='same', activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(keras.layers.Conv2D(32, (3, 3), padding='same', activation='relu'))
+    model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Flatten())
-    model.add(Dense(228, activation='relu'))
-    model.add(Dense(57, activation='softmax'))
+    model.add(keras.layers.Flatten())
+    model.add(keras.layers.Dense(228, activation='relu'))
+    model.add(keras.layers.Dense(57, activation='softmax'))
     return model
 
 from keras.metrics import top_k_categorical_accuracy
