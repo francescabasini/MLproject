@@ -158,14 +158,14 @@ with open('dictionaries/ResNet18_TOPonly_5epochsDict.pkl', 'wb') as file_pi:
 # list all data in history
 print(model.history.history.keys())
 # summarize history for accuracy
-plt.figure()
-plt.plot(model.history.history['acc'])
-plt.plot(model.history.history['val_acc'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-plt.show(block=False)
+#plt.figure()
+#plt.plot(model.history.history['acc'])
+#plt.plot(model.history.history['val_acc'])
+#plt.title('model accuracy')
+#plt.ylabel('accuracy')
+#plt.xlabel('epoch')
+#plt.legend(['train', 'test'], loc='upper left')
+#plt.show(block=False)
 
 #### Once I saved these infos
 
