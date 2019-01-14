@@ -4,7 +4,7 @@ import matplotlib.pylab as plt
 import os
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
-from metrics_and_useful_functions import crop_image, crop_image_train
+from metrics_and_useful_functions import crop_image_valid
 
 
 
@@ -88,7 +88,7 @@ model = load_model(os.path.join(work_dir, 'RN18_finetuning_differentcrops_2nd_st
 
 # generators
 test_datagen = ImageDataGenerator(horizontal_flip=True,
-                                  preprocessing_function=crop_image_train)
+                                  preprocessing_function=crop_image_valid)
 df_one_img = df_57artists[df_57artists['new_filename'] == str(img_number + '.jpg')].reset_index(drop=True)
 test_generator = test_datagen.flow_from_dataframe(df_one_img, os.path.join(work_dir, 'all_paintings'),
                             target_size=(224, 224), x_col='new_filename', y_col='artist', has_ext=True, seed=100,
@@ -111,4 +111,4 @@ img = plt.imread(os.path.join(work_dir, 'all_paintings', img_number + '.jpg'))
 plt.figure()
 plt.imshow(img)
 plt.figure()
-plt.imshow(crop_image_train(img))
+plt.imshow(crop_image_valid(img))
