@@ -81,7 +81,7 @@ x = keras.layers.Dropout(0.3)(x)
 output = Dense(n_classes, activation='softmax')(x)
 
 # this is the model we will train
-model50dropdrop = Model(inputs=base_model.input, outputs=output)
+model50drop = Model(inputs=base_model.input, outputs=output)
 
 model50drop.summary()
 
