@@ -74,7 +74,7 @@ x = GlobalAveragePooling2D()(base_model.output)
 #put or not keras.layers.?
 
 # let's add a fully-connected layer
-x = Flatten(x)
+#x = Flatten()(x)
 x = Dropout(0.3)(x)
 
 # we add a logistic/classification layer for our classes
