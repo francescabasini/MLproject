@@ -203,7 +203,7 @@ labels = train_generator.class_indices
 labels = dict((v,k) for k,v in labels.items())
 predictions = [labels[k] for k in predicted_class_indices]
 
-paint_list_valid = open('data/pain_list_valid.txt', 'r').read().split('\n')
+paint_list_valid = open('data/paint_list_valid.txt', 'r').read().split('\n')
 ###   Confusion matrix   ###
 # in the following steps I want to create a dataframe with the predictions and actual authors of the validation set
 df_val = df[df['new_filename'].isin(paint_list_valid)]   #.artist
