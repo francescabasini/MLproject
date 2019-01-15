@@ -62,7 +62,7 @@ STEP_SIZE_VALID=valid_generator.n//valid_generator.batch_size
 
 from keras.applications.resnet50 import ResNet50
 from keras.models import Model
-from keras.layers import Dense, GlobalAveragePooling2D
+from keras.layers import Dense, GlobalAveragePooling2D, Flatten, Dropout
 from keras import backend as K
 
 n_classes= len(artist_list)
