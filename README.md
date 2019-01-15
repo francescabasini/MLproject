@@ -1,4 +1,4 @@
-Indentification of paintings by artist via transfer learning with different neural nets
+Identification of paintings by artist via transfer learning with different neural nets
 
 
 NB: import image-classifiers to get pre-trained weights and architecture for ResNet18
