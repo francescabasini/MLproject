@@ -163,7 +163,7 @@ model50.fit_generator(generator=train_generator,\
                     verbose=2, epochs=11, callbacks=[learning_rate_reduction])
 time_end = datetime.now()
 print('Tempo di esecuzione per fit_gen: {}'.format(time_end-time_start))
-model50.save('data/ResNet50_TOPonly_30epochs.h5')
+model50.save('data/ResNet50_TOPonly_11epochs.h5')
 
 # accuracy plots
 import pickle
