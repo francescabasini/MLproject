@@ -70,17 +70,17 @@ base_model = ResNet50(input_shape=(224,224,3), weights='imagenet',include_top=Fa
 #
 base_model.summary()
 
-x = keras.layers.GlobalAveragePooling2D()(base_model.output)
+x = GlobalAveragePooling2D()(base_model.output)
 #put or not keras.layers.?
 
 # let's add a fully-connected layer
 #x = keras.layers.Dense(1024, activation='relu')(x)
 
 # we add a logistic/classification layer for our classes
-output = keras.layers.Dense(n_classes, activation='softmax')(x)
+output = Dense(n_classes, activation='softmax')(x)
 
 # this is the model we will train
-model50 = keras.models.Model(inputs=base_model.input, outputs=output)
+model50 = Model(inputs=base_model.input, outputs=output)
 
 model50.summary()
 
@@ -160,7 +160,7 @@ model50.fit_generator(generator=train_generator,\
                     steps_per_epoch=STEP_SIZE_TRAIN,\
                     validation_data=valid_generator,\
                     validation_steps=STEP_SIZE_VALID,\
-                    verbose=2, epochs=30, callbacks=[learning_rate_reduction])
+                    verbose=2, epochs=11, callbacks=[learning_rate_reduction])
 time_end = datetime.now()
 print('Tempo di esecuzione per fit_gen: {}'.format(time_end-time_start))
 model50.save('data/ResNet50_TOPonly_30epochs.h5')
@@ -169,7 +169,7 @@ model50.save('data/ResNet50_TOPonly_30epochs.h5')
 import pickle
 import os
 os.system("mkdir dictionaries")
-with open('dictionaries/ResNet50_TOPonly_30epochsDict.pkl', 'wb') as file_pi:
+with open('dictionaries/ResNet50_TOPonly_11epochsDict.pkl', 'wb') as file_pi:
     pickle.dump(model50.history.history, file_pi)
 
 # list all data in history
@@ -182,6 +182,85 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
-plt.savefig('ResNet50_TOPonly_30epochs.png')
+plt.savefig('ResNet50_TOPonly_11epochs.png')
 
+#### Making predictions on validation set, Confusion Matrix and metrics
+# we have to make the batch size of valid_generator to 1 so that
+# it can divide exactly the number of instances in the validation set
+best_valid_generator = valid_datagen.flow_from_dataframe(df, 'data/valid', target_size=(224, 224),\
+ x_col='new_filename', y_col='artist', has_ext=True, seed=1,batch_size=1, shuffle=False, class_mode=None)
+
+###   Predictions of valid set   ###
+# get predictions of valid set
+best_valid_generator.reset()   # reset is crucial!
+preds = model50.predict_generator(generator=best_valid_generator, steps=len(best_valid_generator), verbose=1)
+
+# get indices (numbers) associated to classes (authors)
+predicted_class_indices = np.argmax(preds, axis=1)
+
+# create set of labels in a dictionary
+labels = train_generator.class_indices
+labels = dict((v,k) for k,v in labels.items())
+predictions = [labels[k] for k in predicted_class_indices]
+
+paint_list_valid = open('data/pain_list_valid.txt', 'r').read().split('\n')
+###   Confusion matrix   ###
+# in the following steps I want to create a dataframe with the predictions and actual authors of the validation set
+df_val = df[df['new_filename'].isin(paint_list_valid)]   #.artist
+# df_val has the true artist in 'artist' column
+
+# I create a dataframe with jpg names and predictions (I can do this since shuffle=False in best_valid_generator)
+df_jpg_with_predictions = pd.DataFrame({'new_filename': best_valid_generator.filenames,
+                                        'artist_predicted': predictions})
+
+# merge the two dataframes
+df_val_with_predictions = pd.merge(df_val, df_jpg_with_predictions, how='inner', on='new_filename', sort=False)
+
+# create arrays for confusion matrix
+y_true = np.asarray(df_val_with_predictions['artist'])
+y_pred = np.asarray(df_val_with_predictions['artist_predicted'])
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_true, y_pred)
+
+with open('dictionaries/ResNet50_TOPonly_11epochsDict.pkl', 'rb') as file_pi:
+    hist = pickle.load(file_pi)
+
+#Writing metrics results in a txt file
+acc_train = hist['acc'][9]
+print('Training accuracy of best model is: {}'.format(acc_train))
+evalu = model50.evaluate_generator(generator=valid_generator, steps=len(valid_generator))
+acc_valid = evalu[1]
+print('Validation accuracy of best model is: {}'.format(acc_valid))
+# true precision/recall/F1_score of the model
+precis = np.mean(np.diag(cm) / np.sum(cm, axis = 1))
+print('Precision of best model is: {}'.format(precis))
+rec = np.mean(np.diag(cm) / np.sum(cm, axis = 0))
+print('Recall of best model is: {}'.format(rec))
+f1 = 2 * ((precis * rec) / (precis + rec))
+print('F1 Score of best model is: {}'.format(f1))
+# top3 training and validation accuracy
+acc_top3_train = hist['top_3_categorical_accuracy'][9]
+print('Top-3 training accuracy of best model is: {}'.format(acc_top3_train))
+acc_top3_valid = evalu[2]
+print('Top-3 validation accuracy of best model is: {}'.format(acc_top3_valid))
+
+
+#Writing everything in a txt
+file = open("ResNet50_TOP_11epochs_metrics.txt", "w") 
+file.write('Training accuracy of best model is: {}'.format(acc_train)) 
+file.write('\nValidation accuracy of best model is: {}'.format(acc_valid)) 
+file.write('\nPrecision of best model is: {}'.format(precis)) 
+file.write('\nRecall of best model is: {}'.format(rec))
+file.write('\nF1 Score of best model is: {}'.format(f1))
+file.write('\nTop-3 training accuracy of best model is: {}'.format(acc_top3_train))
+file.write('\nTop-3 validation accuracy of best model is: {}'.format(acc_top3_valid))
+file.close() 
+
+#Plot Confusion Matrix
+plt.matshow(cm)
+plt.title('Confusion matrix')
+plt.colorbar()
+plt.ylabel('True label')
+plt.xlabel('Predicted label')
+plt.savefig('ResNet50_TOP_11epochs_ConfusionMatrix.png')
 
