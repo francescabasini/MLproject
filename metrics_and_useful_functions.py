@@ -115,6 +115,20 @@ def crop_image(img):
     im = np.expand_dims(im, axis=0)
     return im
 
+def crop_image_web(img):
+    im = img
+    if len(im.shape) < 3:  # make black&white images RGB
+        im = np.stack((im, im, im), -1)
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # now 224x224 crop at the center
+    numb_0 = im.shape[0] // 2 - 112
+    numb_1 = im.shape[1] // 2 - 112
+    im = im[numb_0:(numb_0 + 224), numb_1:(numb_1 + 224), :]
+    # add one dimension for prediction
+    im = np.expand_dims(im, axis=0)
+    return im
+
 def crop_image_train(img):
     im = img
     if len(im.shape) < 3:  # make black&white images RGB
@@ -185,6 +199,36 @@ def crop_image_valid_resnet50(img):
         im = np.stack((im, im, im), -1)
     if im.shape[2] == 4:  # remove 4th channel if present
         im = im[:, :, 0:3]
+    # now 224x224 crop at the center
+    numb_0 = im.shape[0] // 2 - 112
+    numb_1 = im.shape[1] // 2 - 112
+    im = im[numb_0:(numb_0 + 224), numb_1:(numb_1 + 224), :]
+    return im
+
+def crop_train_to_grayscale(img):
+    im = img
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # to grayscale
+    def rgb2gray(rgb):
+        return np.around(np.dot(rgb[..., :3], [0.299, 0.587, 0.114])).astype('int')
+    im = rgb2gray(im)
+    im = np.stack((im, im, im), axis=2)
+    # now random 224x224 crop
+    rand_numb_0 = random.randint(0, im.shape[0] - 224)
+    rand_numb_1 = random.randint(0, im.shape[1] - 224)
+    im = im[rand_numb_0:(rand_numb_0 + 224), rand_numb_1:(rand_numb_1 + 224), :]
+    return im
+
+def crop_valid_to_grayscale(img):
+    im = img
+    if im.shape[2] == 4:  # remove 4th channel if present
+        im = im[:, :, 0:3]
+    # to grayscale
+    def rgb2gray(rgb):
+        return np.around(np.dot(rgb[..., :3], [0.299, 0.587, 0.114])).astype('int')
+    im = rgb2gray(im)
+    im = np.stack((im, im, im), axis=2)
     # now 224x224 crop at the center
     numb_0 = im.shape[0] // 2 - 112
     numb_1 = im.shape[1] // 2 - 112
