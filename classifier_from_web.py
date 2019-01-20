@@ -16,6 +16,10 @@ while True:
     try:
         img_name = input('Enter the image file name: ')
         img = plt.imread(os.path.join(work_dir, 'new_images_from_web\\', img_name + '.jpg'))
+        if len(img.shape) < 3:  # make black&white images RGB
+            img = np.stack((img, img, img), -1)
+        if img.shape[2] == 4:  # remove 4th channel if present
+            img = img[:, :, 0:3]
         break
     except FileNotFoundError:
         print('Entered image name does not exist.')
